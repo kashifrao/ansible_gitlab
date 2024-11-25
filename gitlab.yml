@@ -1,0 +1,32 @@
+
+
+- name: "Curl RPM for Gitlab CE"
+  shell: sudo curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+
+- name: "Install Gitlab-CE"
+  yum:
+    name:
+      - gitlab-ce
+    state: present
+  become_user: root
+
+- name: Copy Gitlab - gitlab.rb File
+  template:
+    src: "{{ansible_roles_path}}/files/gitlab/gitlab.j2"
+    dest: "/etc/gitlab/gitlab.rb"
+  become_user: root
+
+- name: Copy Gitlab - Nginx Conf File
+  template:
+    src: "{{ansible_roles_path}}/files/gitlab/gitlab-http.conf.j2"
+    dest: "/var/opt/gitlab/nginx/conf/gitlab-http.conf"
+  become_user: root
+
+- name: "Gitlab CE - Reconfigure"
+  shell: sudo gitlab-ctl reconfigure
+  become_user: root
+
+- name: "Gitlab CE - restart"
+  shell: sudo /opt/gitlab/bin/gitlab-ctl restart
+  become_user: root
+
